@@ -1,70 +1,44 @@
 extends Node2D
 
-@export_group("Tilemap Settings")
-@export var map_width: int = 6
-@export var map_height: int = 4
-@export var tile_size: Vector2i = Vector2i(28, 14)
-
-@onready var tilemap_layer: TileMapLayer = $TileMapLayer
-@onready var camera: Camera2D = $Camera2D
+@onready var tileMapLayer: TileMapLayer = $TileMapLayer
 
 func _ready() -> void:
-	setup_isometric_tilemap()
-	generate_tilemap()
-	center_camera()
-	queue_redraw()
+	var texture: Texture2D = load("res://greentile.png")
+	if not texture:
+		push_error("Failed to load greentile.png")
+		return
+	
+	createIsometricTileSet(texture)
+	fillMap()
 
-func setup_isometric_tilemap() -> void:
-	print("=== Setting up tilemap ===")
-	if tilemap_layer.tile_set == null:
-		var tile_set = TileSet.new()
-		tile_set.tile_shape = TileSet.TILE_SHAPE_ISOMETRIC
-		tile_set.tile_size = tile_size
-		
-		var source = TileSetAtlasSource.new()
-		var texture = load("res://greentile.png")
-		print("Texture loaded: ", texture != null)
-		if texture:
-			print("Texture size: ", texture.get_size())
-		source.texture = texture
-		source.texture_region_size = tile_size
-		source.create_tile(Vector2i(0, 0))
-		tile_set.add_source(source, 0)
-		
-		tilemap_layer.tile_set = tile_set
-		print("TileSet created and assigned")
-	else:
-		tilemap_layer.tile_set.tile_shape = TileSet.TILE_SHAPE_ISOMETRIC
-		tilemap_layer.tile_set.tile_size = tile_size
-		print("TileSet already existed, updated shape and size")
+func createIsometricTileSet(texture: Texture2D) -> void:
+	var tileSet: TileSet = TileSet.new()
+	
+	# Configure for Isometric
+	tileSet.tile_shape = TileSet.TILE_SHAPE_ISOMETRIC
+	tileSet.tile_layout = TileSet.TILE_LAYOUT_DIAMOND_DOWN
+	
+	# Set tile size. Isometric grids are typically 2:1 ratio.
+	# We use the texture width and half of it for the height.
+	var textureSize: Vector2i = texture.get_size()
+	tileSet.tile_size = Vector2i(textureSize.x, int(textureSize.x * 0.5))
+	
+	# Create a TileSetAtlasSource
+	var source: TileSetAtlasSource = TileSetAtlasSource.new()
+	source.texture = texture
+	source.texture_region_size = textureSize
+	
+	# Create a single tile at (0, 0)
+	source.create_tile(Vector2i(0, 0))
+	
+	# Add the source to the TileSet with ID 0
+	tileSet.add_source(source, 0)
+	
+	# Assign the TileSet to the layer
+	tileMapLayer.tile_set = tileSet
 
-func generate_tilemap() -> void:
-	tilemap_layer.clear()
-	tilemap_layer.scale = Vector2(2, 2)
-	var cell_count := 0
-	for x in range(map_width):
-		for y in range(map_height):
-			tilemap_layer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0))
-			cell_count += 1
-	print("Isometric tilemap generated with size: %d x %d (%d cells)" % [map_width, map_height, cell_count])
-	print("TileMapLayer position: ", tilemap_layer.position)
-	print("TileMapLayer visible: ", tilemap_layer.visible)
-	print("TileMapLayer z_index: ", tilemap_layer.z_index)
-
-func get_world_position(tile_coords: Vector2i) -> Vector2:
-	return tilemap_layer.map_to_local(tile_coords)
-
-func get_tile_coords(world_pos: Vector2) -> Vector2i:
-	return tilemap_layer.local_to_map(world_pos)
-
-func resize_map(new_width: int, new_height: int) -> void:
-	map_width = new_width
-	map_height = new_height
-	print("Camera position: ", camera.position)
-	print("Camera zoom: ", camera.zoom)
-	print("Camera enabled: ", camera.enabled)
-	generate_tilemap()
-
-func center_camera() -> void:
-	var center_tile := Vector2i(map_width / 2, map_height / 2)
-	camera.position = tilemap_layer.map_to_local(center_tile)
+func fillMap() -> void:
+	# Generate a 10x10 grid
+	for x: int in range(10):
+		for y: int in range(10):
+			tileMapLayer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0))
