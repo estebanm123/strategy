@@ -10,6 +10,7 @@ func _ready() -> void:
 	
 	createIsometricTileSet(texture)
 	fillMap()
+	setupCamera()
 
 func createIsometricTileSet(texture: Texture2D) -> void:
 	var tileSet: TileSet = TileSet.new()
@@ -38,7 +39,20 @@ func createIsometricTileSet(texture: Texture2D) -> void:
 	tileMapLayer.tile_set = tileSet
 
 func fillMap() -> void:
-	# Generate a 10x10 grid
-	for x: int in range(10):
-		for y: int in range(10):
+	for x: int in range(7):
+		for y: int in range(4):
 			tileMapLayer.set_cell(Vector2i(x, y), 0, Vector2i(0, 0))
+
+func setupCamera() -> void:
+	var camera: Camera2D = Camera2D.new()
+	camera.zoom = Vector2(3, 3)
+	add_child(camera)
+	
+	var rect: Rect2i = tileMapLayer.get_used_rect()
+	if rect.size.x == 0:
+		return
+
+	var startPos: Vector2 = tileMapLayer.map_to_local(rect.position)
+	var endPos: Vector2 = tileMapLayer.map_to_local(rect.end - Vector2i(1, 1))
+	
+	camera.position = (startPos + endPos) / 2.0
