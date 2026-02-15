@@ -3,7 +3,7 @@ extends Node2D
 @onready var tileMapLayer: TileMapLayer = $TileMapLayer
 
 func _ready() -> void:
-	var texture: Texture2D = load("res://greentile.png")
+	var texture: Texture2D = load("res://sprites/greentile.png")
 	if not texture:
 		push_error("Failed to load greentile.png")
 		return
@@ -45,7 +45,7 @@ func fillMap() -> void:
 
 func setupCamera() -> void:
 	var camera: Camera2D = Camera2D.new()
-	camera.zoom = Vector2(3, 3)
+	camera.zoom = Vector2(4, 4)
 	add_child(camera)
 	
 	var rect: Rect2i = tileMapLayer.get_used_rect()
