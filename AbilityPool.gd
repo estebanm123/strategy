@@ -12,7 +12,8 @@ func registerAbility(
 	action: Callable
 ) -> void:
 	abilityCreators[abilityName] = func(param: float) -> Ability:
-		return Ability.new(abilityName, intent, action, param)
+		var filledIntent: String = intent.format([param])
+		return Ability.new(abilityName, filledIntent, action, param)
 
 func initializeAbilities() -> void:
 	var emptyAction: Callable = func(): pass
