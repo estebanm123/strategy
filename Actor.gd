@@ -40,7 +40,7 @@ func selectNextAbility() -> void:
         Ability.AbilityName.BLOCK:
             param = baseDefense
     
-    selectedAbility = creator.call(param)
+    selectedAbility = creator.call(self, param)
     updateIntentLabel(selectedAbility.intent)
 
 func updateIntentLabel(text: String) -> void:

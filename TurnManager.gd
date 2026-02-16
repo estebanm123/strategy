@@ -3,16 +3,13 @@ class_name TurnManager
 
 var isPlayerTurn: bool = true
 var enemies: Array[Actor] = []
-var tileMapWrapper: TileMapWrapper
 var abilityPool: AbilityPool
 var parentNode: Node2D
 
 func _init(
-    newTileMapWrapper: TileMapWrapper,
     newAbilityPool: AbilityPool,
     newParentNode: Node2D
 ) -> void:
-    tileMapWrapper = newTileMapWrapper
     abilityPool = newAbilityPool
     parentNode = newParentNode
 
@@ -53,7 +50,7 @@ func spawnEnemies() -> void:
         enemy.selectNextAbility()
         
         var tilePos: Vector2i = Vector2i(spawnColumn, availableRows[i])
-        var worldPos: Vector2 = tileMapWrapper.tileMapLayerRef.map_to_local(tilePos)
+        var worldPos: Vector2 = TileMapWrapper.tileMapLayerRef.map_to_local(tilePos)
         enemy.position = worldPos
         parentNode.add_child(enemy)
         enemies.append(enemy)

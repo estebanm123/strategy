@@ -9,31 +9,42 @@ func _init() -> void:
 func registerAbility(
 	abilityName: Ability.AbilityName,
 	intent: String,
-	action: Callable
+	actionCreator: Callable
 ) -> void:
-	abilityCreators[abilityName] = func(param: float) -> Ability:
+	abilityCreators[abilityName] = func(actor: Actor, param: float) -> Ability:
 		var filledIntent: String = intent.format([param])
+		var action: Callable = actionCreator.call(actor, param)
 		return Ability.new(abilityName, filledIntent, action, param)
 
 func initializeAbilities() -> void:
-	var emptyAction: Callable = func(): pass
+	var emptyActionCreator: Callable = func(_actor: Actor, _param: float) -> Callable:
+		return func(): pass
 	
 	registerAbility(
 		Ability.AbilityName.BLOCK,
 		"Block {0}",
-		emptyAction
+		emptyActionCreator
 	)
 	
 	registerAbility(
 		Ability.AbilityName.ATTACK_FRONT,
 		"Deal {0} damage to nodes in front",
-		emptyAction
+		emptyActionCreator
 	)
+	
+	var moveActionCreator: Callable = func(actor: Actor, param: float) -> Callable:
+		return func():
+			var currentPos: Vector2 = actor.position
+			var currentTilePos: Vector2i = TileMapWrapper.tileMapLayerRef.local_to_map(currentPos)
+			var tilesRight: int = int(param)
+			var newTilePos: Vector2i = currentTilePos + Vector2i(tilesRight, 0)
+			var newWorldPos: Vector2 = TileMapWrapper.tileMapLayerRef.map_to_local(newTilePos)
+			actor.position = newWorldPos
 	
 	registerAbility(
 		Ability.AbilityName.MOVE,
 		"Move forward by {0}",
-		emptyAction
+		moveActionCreator
 	)
 
 func getAbilityCreator(abilityName: Ability.AbilityName) -> Callable:
