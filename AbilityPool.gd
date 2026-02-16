@@ -1,31 +1,39 @@
 extends Object
 class_name AbilityPool
 
-var abilities: Dictionary = {}
+var abilityCreators: Dictionary[Ability.AbilityName, Callable] = {}
 
 func _init() -> void:
 	initializeAbilities()
 
+func registerAbility(
+	abilityName: Ability.AbilityName,
+	intent: String,
+	action: Callable
+) -> void:
+	abilityCreators[abilityName] = func(param: float) -> Ability:
+		return Ability.new(abilityName, intent, action, param)
+
 func initializeAbilities() -> void:
 	var emptyAction: Callable = func(): pass
 	
-	abilities[Ability.AbilityName.BLOCK] = Ability.new(
+	registerAbility(
 		Ability.AbilityName.BLOCK,
 		"Block {0}",
 		emptyAction
 	)
 	
-	abilities[Ability.AbilityName.ATTACK_FRONT] = Ability.new(
+	registerAbility(
 		Ability.AbilityName.ATTACK_FRONT,
 		"Deal {0} damage to nodes in front",
 		emptyAction
 	)
 	
-	abilities[Ability.AbilityName.MOVE] = Ability.new(
+	registerAbility(
 		Ability.AbilityName.MOVE,
 		"Move forward by {0}",
 		emptyAction
 	)
 
-func getAbility(abilityName: Ability.AbilityName) -> Ability:
-	return abilities.get(abilityName)
+func getAbilityCreator(abilityName: Ability.AbilityName) -> Callable:
+	return abilityCreators.get(abilityName)
